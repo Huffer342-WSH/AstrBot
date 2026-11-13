@@ -1,0 +1,45 @@
+name: NAS ARM64 image
+on:
+  push:
+    branches: [nas/telegram-active-reply-age]
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Test reply filtering
+        run: |
+          uv sync --dev
+          uv run pytest tests/unit/test_telegram_active_reply_age.py tests/unit/test_group_chat_context_wiring.py -q
+      - name: Build dashboard
+        run: |
+          cd dashboard
+          npm install
+          npm run build
+          mkdir -p dist/assets
+          echo 'v4.29.4' > dist/assets/version
+          cd ..
+          mkdir -p astrbot/dashboard
+          cp -r dashboard/dist astrbot/dashboard/dist
+      - uses: docker/setup-buildx-action@v4.4.1
+      - uses: docker/login-action@v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish ARM64 image
+        uses: docker/build-push-action@v7.4.0
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: ghcr.io/huffer342-wsh/astrbot:si-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/Huffer342-WSH/AstrBot
+            org.opencontainers.image.revision=${{ github.sha }}
