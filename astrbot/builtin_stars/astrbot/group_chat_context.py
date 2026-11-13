@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import json
 import random
+import time
 import uuid
 from collections import defaultdict, deque
 
@@ -85,6 +86,7 @@ class GroupChatContext:
             "ar_possibility": ar_possibility,
             "ar_prompt": ar_prompt,
             "ar_whitelist": ar_whitelist,
+            "telegram_max_message_age": active_reply.get("telegram_max_message_age", 0),
         }
 
     async def get_image_caption(
@@ -124,6 +126,20 @@ class GroupChatContext:
             )
         ):
             return False
+        max_age = cfg["telegram_max_message_age"]
+        if event.get_platform_name() == "telegram" and max_age:
+            if isinstance(max_age, bool) or not isinstance(max_age, int) or max_age < 0:
+                logger.warning(
+                    "Invalid Telegram active reply message age; skipping reply."
+                )
+                return False
+            # The generic timestamp records receipt time, not Telegram send time.
+            message = getattr(event.message_obj.raw_message, "message", None)
+            sent_at = getattr(message, "date", None)
+            if not isinstance(sent_at, datetime.datetime) or sent_at.tzinfo is None:
+                return False
+            if time.time() - sent_at.timestamp() > max_age:
+                return False
         match cfg["ar_method"]:
             case "possibility_reply":
                 return random.random() < cfg["ar_possibility"]

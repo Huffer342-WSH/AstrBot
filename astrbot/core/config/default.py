@@ -232,6 +232,7 @@ DEFAULT_CONFIG = {
             "enable": False,
             "method": "possibility_reply",
             "possibility_reply": 0.1,
+            "telegram_max_message_age": 0,
             "whitelist": [],
         },
     },
@@ -3254,6 +3255,7 @@ CONFIG_METADATA_2 = {
                             "possibility_reply": {
                                 "type": "float",
                             },
+                            "telegram_max_message_age": {"type": "int"},
                         },
                     },
                 },
@@ -4875,6 +4877,14 @@ CONFIG_METADATA_3 = {
                         "slider": {"min": 0, "max": 1, "step": 0.05},
                         "condition": {
                             "provider_ltm_settings.active_reply.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.active_reply.telegram_max_message_age": {
+                        "description": "Telegram 主动回复消息有效期（秒）",
+                        "hint": "0 表示不限制。按 Telegram 发送时间过滤，只影响群聊主动回复，不影响私聊、@、指令或上下文记录。",
+                        "type": "int",
+                        "condition": {
+                            "provider_ltm_settings.active_reply.enable": True
                         },
                     },
                     "provider_ltm_settings.active_reply.whitelist": {
