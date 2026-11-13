@@ -31,6 +31,7 @@ from .aiocqhttp_message_event import AiocqhttpMessageEvent
     "aiocqhttp",
     "适用于 OneBot V11 标准的消息平台适配器，支持反向 WebSockets。",
     support_streaming_message=False,
+    support_message_sent_at=True,
 )
 class AiocqhttpAdapter(Platform):
     def __init__(
@@ -50,6 +51,7 @@ class AiocqhttpAdapter(Platform):
             description="适用于 OneBot 标准的消息平台适配器，支持反向 WebSockets。",
             id=cast(str, self.config.get("id")),
             support_streaming_message=False,
+            support_message_sent_at=True,
         )
 
         self.bot = CQHttp(
@@ -207,6 +209,7 @@ class AiocqhttpAdapter(Platform):
         """
         assert event.sender is not None
         abm = AstrBotMessage()
+        abm.set_sent_at(event.get("time"))
         abm.self_id = str(event.self_id)
         abm.sender = MessageMember(
             str(event.sender["user_id"]),

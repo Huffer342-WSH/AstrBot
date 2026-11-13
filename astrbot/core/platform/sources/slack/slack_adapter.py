@@ -1,7 +1,6 @@
 import asyncio
 import base64
 import re
-import time
 import uuid
 from typing import Any, cast
 
@@ -37,6 +36,7 @@ from .slack_event import SlackMessageEvent
     "slack",
     "适用于 Slack 的消息平台适配器，支持 Socket Mode 和 Webhook Mode。",
     support_streaming_message=False,
+    support_message_sent_at=True,
 )
 class SlackAdapter(Platform):
     def __init__(
@@ -74,6 +74,7 @@ class SlackAdapter(Platform):
             description="适用于 Slack 的消息平台适配器，支持 Socket Mode 和 Webhook Mode。",
             id=cast(str, self.config.get("id")),
             support_streaming_message=False,
+            support_message_sent_at=True,
         )
 
         # 初始化 Slack Web Client
@@ -102,6 +103,7 @@ class SlackAdapter(Platform):
         logger.debug(f"[slack] RawMessage {event}")
 
         abm = AstrBotMessage()
+        abm.set_sent_at(event.get("ts"))
         abm.self_id = cast(str, self.bot_self_id)
 
         # 获取用户信息
@@ -142,7 +144,7 @@ class SlackAdapter(Platform):
             abm.session_id = user_id
 
         abm.message_id = event.get("client_msg_id", uuid.uuid4().hex)
-        abm.timestamp = int(float(event.get("ts", time.time())))
+        abm.timestamp = int(abm.sent_at) if abm.sent_at is not None else abm.timestamp
 
         # 处理消息内容
         message_text = event.get("text", "")

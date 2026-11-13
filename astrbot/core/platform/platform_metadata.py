@@ -35,3 +35,9 @@ class PlatformMetadata:
 
     参考 https://github.com/AstrBotDevs/AstrBot/pull/5045
     """
+
+    support_message_sent_at: bool = False
+    """Whether ordinary incoming messages provide a platform send time.
+
+    Individual messages may still have sent_at=None when that time is unavailable.
+    """

@@ -2,6 +2,7 @@ import asyncio
 import os
 import re
 import sys
+import time
 import uuid
 from contextlib import suppress
 from typing import cast
@@ -54,7 +55,7 @@ else:
     from typing_extensions import override
 
 
-@register_platform_adapter("telegram", "telegram 适配器")
+@register_platform_adapter("telegram", "telegram 适配器", support_message_sent_at=True)
 class TelegramPlatformAdapter(Platform):
     _FORUM_TOPIC_NAME_CACHE_MAX_SIZE = 1000
 
@@ -241,7 +242,12 @@ class TelegramPlatformAdapter(Platform):
     @override
     def meta(self) -> PlatformMetadata:
         id_ = self.config.get("id") or "telegram"
-        return PlatformMetadata(name="telegram", description="telegram 适配器", id=id_)
+        return PlatformMetadata(
+            name="telegram",
+            description="telegram 适配器",
+            id=id_,
+            support_message_sent_at=True,
+        )
 
     @override
     async def run(self) -> None:
@@ -582,6 +588,7 @@ class TelegramPlatformAdapter(Platform):
                         message.message.append(mention)
 
         message = AstrBotMessage()
+        message.set_sent_at(getattr(update.message, "date", None))
         message.session_id = str(update.message.chat.id)
 
         # 获得是群聊还是私聊
@@ -899,6 +906,7 @@ class TelegramPlatformAdapter(Platform):
         if media_group_id not in self.media_group_cache:
             self.media_group_cache[media_group_id] = {
                 "created_at": datetime.now(),
+                "received_at": time.time(),
                 "items": [],
             }
             logger.debug(f"Create media group cache: {media_group_id}")
@@ -968,6 +976,8 @@ class TelegramPlatformAdapter(Platform):
                     f"Failed to convert the first message of media group {media_group_id}"
                 )
                 return
+
+            abm.received_at = entry.get("received_at", abm.received_at)
 
             # Add additional media from remaining updates by reusing convert_message
             for update, context in updates_and_contexts[1:]:

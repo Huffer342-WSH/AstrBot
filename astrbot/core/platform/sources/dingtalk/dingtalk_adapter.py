@@ -78,7 +78,10 @@ class MyEventHandler(dingtalk_stream.EventHandler):
 
 
 @register_platform_adapter(
-    "dingtalk", "钉钉机器人官方 API 适配器", support_streaming_message=True
+    "dingtalk",
+    "钉钉机器人官方 API 适配器",
+    support_streaming_message=True,
+    support_message_sent_at=True,
 )
 class DingtalkPlatformAdapter(Platform):
     def __init__(
@@ -187,6 +190,7 @@ class DingtalkPlatformAdapter(Platform):
             id=cast(str, self.config.get("id")),
             support_streaming_message=True,
             support_proactive_message=True,
+            support_message_sent_at=True,
         )
 
     async def convert_msg(
@@ -196,7 +200,9 @@ class DingtalkPlatformAdapter(Platform):
         abm = AstrBotMessage()
         abm.message = []
         abm.message_str = ""
-        abm.timestamp = int(cast(int, message.create_at) / 1000)
+        abm.set_sent_at(message.create_at, milliseconds=True)
+        if abm.sent_at is not None:
+            abm.timestamp = int(abm.sent_at)
         abm.type = (
             MessageType.GROUP_MESSAGE
             if message.conversation_type == "2"

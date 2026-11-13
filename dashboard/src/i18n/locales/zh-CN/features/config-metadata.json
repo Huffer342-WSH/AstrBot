@@ -1307,9 +1307,9 @@
           "method": {
             "description": "主动回复方法"
           },
-          "telegram_max_message_age": {
-            "description": "Telegram 主动回复消息有效期（秒）",
-            "hint": "0 表示不限制；仅过滤过期 Telegram 群消息的主动回复，私聊、@、指令和上下文记录不受影响。"
+          "max_message_age": {
+            "description": "主动回复消息有效期（秒）",
+            "hint": "0 表示不限制。按发送时间过滤群聊主动回复；时间缺失时跳过，不支持的平台不受影响。"
           },
           "possibility_reply": {
             "description": "回复概率",

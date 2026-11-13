@@ -1391,9 +1391,9 @@
           "method": {
             "description": "プロアクティブ返信の方式"
           },
-          "telegram_max_message_age": {
-            "description": "Telegram active reply message age (seconds)",
-            "hint": "0 disables the limit. Only unsolicited replies to old Telegram group messages are suppressed; direct messages, mentions, commands and context recording are unchanged."
+          "max_message_age": {
+            "description": "自動返信の対象となるメッセージの有効期間（秒）",
+            "hint": "0 は制限なし。送信時刻でグループの自動返信を制限し、時刻不明のメッセージはスキップします。非対応プラットフォームには影響しません。"
           },
           "possibility_reply": {
             "description": "返信確率",

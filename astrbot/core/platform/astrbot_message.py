@@ -1,5 +1,7 @@
+import math
 import time
 from dataclasses import dataclass
+from datetime import datetime
 
 from astrbot.core.message.components import BaseMessageComponent
 
@@ -63,10 +65,39 @@ class AstrBotMessage:
     message_str: str  # 最直观的纯文本消息字符串
     raw_message: object
     timestamp: int  # 消息时间戳
+    received_at: float  # Local Unix seconds when the adapter observes the message.
+    sent_at: float | None  # Platform send time in Unix seconds, or unknown.
 
     def __init__(self) -> None:
-        self.timestamp = int(time.time())
+        self.received_at = time.time()
+        self.sent_at = None
+        # Preserve the legacy timestamp semantics for existing consumers.
+        self.timestamp = int(self.received_at)
         self.group = None
+
+    def set_sent_at(
+        self, value: datetime | str | int | float | None, *, milliseconds: bool = False
+    ) -> None:
+        """Normalize a platform send time without substituting local time.
+
+        Args:
+            value: A timezone-aware datetime or numeric Unix timestamp.
+            milliseconds: Whether a numeric platform timestamp uses milliseconds.
+        """
+        self.sent_at = None
+        try:
+            if isinstance(value, datetime):
+                if value.utcoffset() is None:
+                    return
+                timestamp = value.timestamp()
+            elif isinstance(value, (str, int, float)) and not isinstance(value, bool):
+                timestamp = float(value) / (1000 if milliseconds else 1)
+            else:
+                return
+            if math.isfinite(timestamp) and timestamp > 0:
+                self.sent_at = timestamp
+        except (ValueError, OverflowError, OSError):
+            return
 
     def __str__(self) -> str:
         return str(self.__dict__)

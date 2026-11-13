@@ -1391,9 +1391,9 @@
                     "method": {
                         "description": "Метод активного ответа"
                     },
-                    "telegram_max_message_age": {
-                      "description": "Telegram active reply message age (seconds)",
-                      "hint": "0 disables the limit. Only unsolicited replies to old Telegram group messages are suppressed; direct messages, mentions, commands and context recording are unchanged."
+                    "max_message_age": {
+                      "description": "Допустимый возраст сообщения для инициативного ответа (секунды)",
+                      "hint": "0 отключает ограничение. Инициативные ответы в группах фильтруются по времени отправки; сообщения без времени пропускаются. Неподдерживаемые платформы не затрагиваются."
                     },
                     "possibility_reply": {
                         "description": "Вероятность ответа",

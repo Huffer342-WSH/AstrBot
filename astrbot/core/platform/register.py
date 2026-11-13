@@ -17,6 +17,7 @@ def register_platform_adapter(
     support_streaming_message: bool = True,
     i18n_resources: dict[str, dict] | None = None,
     config_metadata: dict | None = None,
+    support_message_sent_at: bool = False,
 ):
     """用于注册平台适配器的带参装饰器。
 
@@ -54,6 +55,7 @@ def register_platform_adapter(
             module_path=module_path,
             i18n_resources=i18n_resources,
             config_metadata=config_metadata,
+            support_message_sent_at=support_message_sent_at,
         )
         platform_registry.append(pm)
         platform_cls_map[adapter_name] = cls

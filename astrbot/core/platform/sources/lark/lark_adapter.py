@@ -49,7 +49,10 @@ USER_NAME_LOOKUP_TIMEOUT_SECONDS = 5
 
 
 @register_platform_adapter(
-    "lark", "飞书机器人官方 API 适配器", support_streaming_message=True
+    "lark",
+    "飞书机器人官方 API 适配器",
+    support_streaming_message=True,
+    support_message_sent_at=True,
 )
 class LarkPlatformAdapter(Platform):
     def __init__(
@@ -597,6 +600,7 @@ class LarkPlatformAdapter(Platform):
             description="飞书机器人官方 API 适配器",
             id=cast(str, self.config.get("id")),
             support_streaming_message=True,
+            support_message_sent_at=True,
         )
 
     async def convert_msg(self, event: lark.im.v1.P2ImMessageReceiveV1) -> None:
@@ -610,10 +614,9 @@ class LarkPlatformAdapter(Platform):
 
         abm = AstrBotMessage()
 
-        if message.create_time:
-            abm.timestamp = int(message.create_time) // 1000
-        else:
-            abm.timestamp = int(time.time())
+        abm.set_sent_at(message.create_time, milliseconds=True)
+        if abm.sent_at is not None:
+            abm.timestamp = int(abm.sent_at)
         abm.message = []
         abm.type = (
             MessageType.GROUP_MESSAGE

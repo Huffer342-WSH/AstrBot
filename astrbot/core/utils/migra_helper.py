@@ -321,6 +321,16 @@ def migrate_config_on_load(config: dict[str, Any], config_path: Path) -> bool:
         OSError: If migration input cannot be safely persisted or read.
     """
     changed = False
+    group_settings = config.get("provider_ltm_settings")
+    if isinstance(group_settings, dict):
+        active_reply = group_settings.get("active_reply")
+        if (
+            isinstance(active_reply, dict)
+            and "telegram_max_message_age" in active_reply
+        ):
+            legacy_age = active_reply.pop("telegram_max_message_age")
+            active_reply.setdefault("max_message_age", legacy_age)
+            changed = True
     pending_path = config_path.with_suffix(".subagents-migration.json")
     legacy_subagents = config.get("subagent_orchestrator")
     if legacy_subagents is not None and not isinstance(legacy_subagents, dict):
